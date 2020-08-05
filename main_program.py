@@ -261,6 +261,9 @@ def main_step():
 				zmqo.imsend("Done", dummy)
 				print("paralel waiting CPT FALSE... ")
 				print("################\n", hasil_class, "\n################")
+				slist_all = [slist1, slist2, slist3, slist4, slist5]  # , slist7, slist8]
+				blist_all = [blist1, blist2, blist3, blist4, blist5]
+				NG_list, NG_num, NG_sect = final_decision(blist_all, slist_all)
 				zmqo.imsend(hasil_class, dummy)
 				if hasil_class == "Part OK":
 					give_trig_eth('MR13', '1')
