@@ -43,7 +43,6 @@ def do_detect(image):
     for i in range(int(num_detections)):
         if scores[i] > 0.65:
             box = boxes[i] * np.array([image.shape[0], image.shape[1], image.shape[0], image.shape[1]])
-
             image = cv2.rectangle(image, (int(box[1]), int(box[0])), (int(box[3]), int(box[2])), (0, 0, 255), 2)
             image = cv2.putText(image, '%s %.2f' % (class_name[int(classes[i])], scores[i]),
                                 (int(box[1]) - 10, int(box[0]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255))

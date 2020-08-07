@@ -57,7 +57,7 @@ def final_decision(bbox_list, NG_list, isClassi=False, conf_list=None):
                                 l['pengikut'] += 1
                                 isNew = False
 
-                if isNew == True:
+                if isNew:
                     # print('ga masuk')
                     newNG = dict(
                         Nama=tipeNG,

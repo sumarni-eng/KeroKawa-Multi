@@ -117,19 +117,13 @@ def detection(img, sec, n):
 			print("error di detection", e)
 			img = basler1.ambilgambar()
 
-	msg = ""
 	if len(stat_list) < 1:
-		msg = "OK"
 		pred = "OK"
-		color = (0, 255, 0)
 		stat_list = ['OK']
 		boxes = []
 	else:
-		msg = txtNG(stat_list)
 		pred = "NG"
-		color = (0, 0, 255)
 
-	pesan1 = {"box": boxes, "Section": sec, "types": stat_list, "Result": [pred], "Change_part": 0}  # box nya int
 	pkt = {"box": boxes, "defect": pred, "sec": sec}
 	zmqoS.imsend(pkt, ori)
 	zmqo.imsend(sec + pred + str(n), pic)
@@ -152,19 +146,34 @@ def section_done(prev_sec, cur_sec):
 	return issaved, cur_sec
 
 
-def mainProcess(listS1, listS2, listS3, listB1, listB2, listB3, scs, n):
+def mainprocess(listS1, listS2, listS3, listB1, listB2, listB3, scs, n):
 	global Pic1, Pic2, Pic3
 	print('SUKSES')
 	Pic1, Pic2, Pic3 = get_img(Pic1, Pic2, Pic3)
 	give_trig_eth('MR300', '1')
-	res1, box1 = detection(Pic2, scs[0], n)
-	res2, box2 = detection(Pic1, scs[1], n)
+	res1, box1 = detection(Pic1, scs[0], n)
+	res2, box2 = detection(Pic2, scs[1], n)
 	res3, box3 = detection(Pic3, scs[2], n)
 	listS3.append(res3)
 	listB3.append(box3)
 	listS1.append(res1)
 	listS2.append(res2)
 	listB1.append(box1)
+	listB2.append(box2)
+	give_trig_eth('MR300', '0')
+
+
+def mainprocess2(listS2, listS3, listB2, listB3, scs, n):
+	global Pic1, Pic2, Pic3
+	print('SUKSES')
+	Pic1, Pic2, Pic3 = get_img(Pic1, Pic2, Pic3)
+	zmqo.imsend("3", Pic1)
+	res2, box2 = detection(Pic2, scs[1], n)
+	res3, box3 = detection(Pic3, scs[2], n)
+	give_trig_eth('MR300', '1')
+	listS3.append(res3)
+	listB3.append(box3)
+	listS2.append(res2)
 	listB2.append(box2)
 	give_trig_eth('MR300', '0')
 
@@ -189,8 +198,6 @@ def main_step():
 	global n_i
 	i1 = 0
 	i2 = 0
-	i3 = 0
-	i4 = 0
 	isDone = True
 	curS = 0
 	is1image = True  # trigger 1 image only
@@ -217,7 +224,7 @@ def main_step():
 					istime = True
 				print('Posisi 1')
 				i1 += 1
-				mainProcess(slist1, slist2, slist3, blist1, blist2, blist3, ["Sec1", "Sec2", "Sec3"], i1)
+				mainprocess(slist1, slist2, slist3, blist1, blist2, blist3, ["Sec1", "Sec2", "Sec3"], i1)
 				curS = 1
 				isSaved, curS = section_done(curS, 1)
 				give_trig_eth("MR300", 0)
@@ -226,7 +233,7 @@ def main_step():
 				istime = False
 				print('Posisi 2')
 				i2 += 1
-				mainProcess(slist3, slist4, slist5, blist3, blist4, blist5, ["Sec3", "Sec4", "Sec5"], i2)
+				mainprocess2(slist4, slist5, blist4, blist5, ["Sec4", "Sec5"], i2)
 				isSaved, curS = section_done(curS, 2)
 				give_trig_eth("MR300", 0)
 				isDone = True
@@ -243,8 +250,8 @@ def main_step():
 				zmqo.imsend("Done", dummy)
 				# zmqo.imsend("Waiting .....", dummy)
 				print("paralel waiting CPT 1... ")
-				print("################\n", hasil_class, "\n################")
-				if hasil_class == "Part OK":
+				print("################\n", "\n################")
+				if NG_list == "Part OK":
 					give_trig_eth('MR13', '1')
 				else:
 					give_trig_eth('MR14', '1')
@@ -259,13 +266,13 @@ def main_step():
 				i2 = 0
 				isSaved, curS = section_done(curS, 3)
 				zmqo.imsend("Done", dummy)
-				print("paralel waiting CPT FALSE... ")
-				print("################\n", hasil_class, "\n################")
-				slist_all = [slist1, slist2, slist3, slist4, slist5]  # , slist7, slist8]
+				slist_all = [slist1, slist2, slist3, slist4, slist5]
 				blist_all = [blist1, blist2, blist3, blist4, blist5]
 				NG_list, NG_num, NG_sect = final_decision(blist_all, slist_all)
-				zmqo.imsend(hasil_class, dummy)
-				if hasil_class == "Part OK":
+				print("paralel waiting CPT FALSE... ")
+				print("################\n", NG_list, "\n################")
+				zmqo.imsend(NG_list, dummy)
+				if len(NG_list) < 1:
 					give_trig_eth('MR13', '1')
 				else:
 					give_trig_eth('MR14', '1')
@@ -281,7 +288,6 @@ if __name__ == '__main__':
 	give_trig_eth('MR15', '0')
 	give_trig_eth('MR301', '0')
 	try:
-		zmqo.imsend("On", dummy)
 		main_step()
 	except KeyboardInterrupt:
 		# print (e)
