@@ -43,6 +43,7 @@ finally:
 
 Pic1 = dummy
 Pic2 = dummy
+Pic3 = dummy
 dd = 0.5
 do_detect(dummy)
 tempt_pr = ''
@@ -168,8 +169,8 @@ def mainprocess2(listS2, listS3, listB2, listB3, scs, n):
 	print('SUKSES')
 	Pic1, Pic2, Pic3 = get_img(Pic1, Pic2, Pic3)
 	zmqo.imsend("3", Pic1)
-	res2, box2 = detection(Pic2, scs[1], n)
-	res3, box3 = detection(Pic3, scs[2], n)
+	res2, box2 = detection(Pic2, scs[0], n)
+	res3, box3 = detection(Pic3, scs[1], n)
 	give_trig_eth('MR300', '1')
 	listS3.append(res3)
 	listB3.append(box3)
